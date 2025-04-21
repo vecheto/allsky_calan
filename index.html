@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AllSky Camera</title>
+    <style>
+        /* Estilo para centrar solo la imagen */
+        .imagen-centrada {
+            display: block;           /* Hace que la imagen se comporte como un bloque */
+            margin: 0 auto;          /* Centra horizontalmente */
+            max-width: 80%;          /* Limita el ancho de la imagen al 80% */
+            height: auto;            /* Mantiene la proporción de la imagen */
+        }
+        /* Estilo para el cuerpo de la página */
+        body {
+            background-color: #000;  /* Fondo negro */
+            color: white;           /* Color del texto */
+            text-align: center;     /* Centra el texto horizontalmente */
+        }
+        /* Estilo para el párrafo de la fecha */
+        p {
+            margin-top: 20px;       /* Espacio entre la imagen y el texto */
+        }
+    </style>
+</head>
+<body>
+    <h1>AllSky Camera</h1>
+    <img src="/allsky.png" alt="AllSky Image" class="imagen-centrada">
+    <p>Última actualización: <span id="fecha"></span></p>
+    <script>
+        function actualizarFecha() {
+            const fecha = new Date();
+            document.getElementById('fecha').textContent = fecha.toLocaleString();
+        }
+        actualizarFecha();
+        setInterval(actualizarFecha, 30000);  // Actualizar cada segundo
+    </script>
+</body>
+</html>
