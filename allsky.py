@@ -81,8 +81,8 @@ def capturar_imagen():
     im.save('allsky.jpeg')
     print('Imagen guardada como allsky.jpeg')
 
-    hora = datetime.now().strftime('%H_%M_%S')
-    ruta_imagen = os.path.join(directorio_fecha, f'{hora}.jpeg')
+    ahora = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
+    ruta_imagen = os.path.join(directorio_fecha, f'{ahora}.jpeg')
     im.save(ruta_imagen)
     print(f'Imagen guardada en {ruta_imagen}')
 
