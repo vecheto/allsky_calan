@@ -8,31 +8,39 @@ import numpy as np
 import threading
 
 # Configuración de la cámara
-ruta_sdk = 'C:/ASI_SDK'
-#os.environ['ZWO_ASI_LIB'] = os.path.join(ruta_sdk, 'ASI_API.dll')  # Windows
-os.environ['ZWO_ASI_LIB'] = os.path.join(ruta_sdk, 'libASICamera2.so')  # Linux
+ruta_sdk = 'C:\ASI_SDK'
+dll_path = os.path.join(ruta_sdk, 'ASICamera2.dll')
+os.environ['ZWO_ASI_LIB'] =  dll_path # Windows
+#os.environ['ZWO_ASI_LIB'] = os.path.join(ruta_sdk, 'libASICamera2.so')  # Linux
 
 # Inicializar la cámara
-asi.init(ruta_sdk)
+asi.init(dll_path)
 num_cameras = asi.get_num_cameras()
 if num_cameras == 0:
     raise Exception('No se encontraron cámaras ZWO ASI conectadas.')
 camera = asi.Camera(0)
 camera_info = camera.get_camera_property()
+camera_values = camera.get_control_values()
+
+if camera_info['IsColorCam']:
+    camera.set_image_type(asi.ASI_IMG_RGB24)
+#
+    
 print(f'Conectado a la cámara: {camera_info["Name"]}')
 
 # Configuración inicial
-exposicion = 1000000  # ms
-ganancia = 100 
+exposicion = 20000  # ms
+ganancia = 50
 brillo_objetivo = 128
 
 
 def calcular_brillo(image):
-    return np.mean(image)
+    return np.median(image)
 
 
 def ajustar_exposicion_ganancia(image):
     global exposicion, ganancia
+    
     brillo = calcular_brillo(image)
 
     # Ajustar exposición
@@ -70,11 +78,11 @@ def capturar_imagen():
     ajustar_exposicion_ganancia(image)
 
     # saving
-    im.save('allsky.png')
-    print('Imagen guardada como allsky.png')
+    im.save('allsky.jpeg')
+    print('Imagen guardada como allsky.jpeg')
 
     hora = datetime.now().strftime('%H_%M_%S')
-    ruta_imagen = os.path.join(directorio_fecha, f'{hora}.png')
+    ruta_imagen = os.path.join(directorio_fecha, f'{hora}.jpeg')
     im.save(ruta_imagen)
     print(f'Imagen guardada en {ruta_imagen}')
 
@@ -87,11 +95,11 @@ class AllSkyHandler(BaseHTTPRequestHandler):
             self.end_headers()
             with open('index.html', 'r') as f:
                 self.wfile.write(f.read().encode())
-        elif self.path == '/allsky.png':
+        elif self.path == '/allsky.jpeg':
             self.send_response(200)
-            self.send_header('Content-type', 'image/png')
+            self.send_header('Content-type', 'image/jpeg')
             self.end_headers()
-            with open('allsky.png', 'rb') as f:
+            with open('allsky.jpeg', 'rb') as f:
                 self.wfile.write(f.read())
         else:
             self.send_response(404)
@@ -127,7 +135,7 @@ html_content = """
 </head>
 <body>
     <h1>AllSky Camera</h1>
-    <img src="/allsky.png" alt="AllSky Image" class="imagen-centrada">
+    <img src="/allsky.jpeg" alt="AllSky Image" class="imagen-centrada">
     <p>Última actualización: <span id="fecha"></span></p>
     <script>
         function actualizarFecha() {
@@ -155,11 +163,12 @@ threading.Thread(target=iniciar_servidor, daemon=True).start()
 try:
     while True:
         ahora = datetime.now().strftime('%H')
-        if int(ahora) > 19 and int(ahora) < 7:
-            capturar_imagen()
-            time.sleep(60)  # Esperar 1 minuto
-        else:
+        if int(ahora) > 8 and int(ahora) < 17:
             print('Camara en Daytime... Mostrando Ultima Foto')
+            time.sleep(60*30) # sleep 30 min
+        else:
+            capturar_imagen()
+            time.sleep(60) # sleep 1 min
 except KeyboardInterrupt:
     print('Deteniendo la captura y el servidor...')
 finally:
