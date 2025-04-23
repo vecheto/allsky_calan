@@ -1,6 +1,6 @@
 # allsky_calan
 
-Compatible with every ASI ZWO camera.
+Compatible with every ASI ZWO camera. Just install "requirements.py" and ensure you have the ZWO drivers.
 
 Just run "allsky.py" and the script will:
 
